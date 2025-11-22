@@ -12,3 +12,7 @@ spring:
 
 server:
   port: 8080
+
+app:
+  crypto:
+    key: "${CRYPTO_KEY:lq9cjTL/c/6S8+/ze8YfsvdGY0BFAG05cjDEXUaRM64=}"
