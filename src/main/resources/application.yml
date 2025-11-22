@@ -16,3 +16,6 @@ server:
 app:
   crypto:
     key: "${CRYPTO_KEY:lq9cjTL/c/6S8+/ze8YfsvdGY0BFAG05cjDEXUaRM64=}"
+  jwt:
+    secret: "${JWT_SECRET:dXJ5kQ5k0dFQ8FzR8rq3Zc5o2JzE7o0PZbS3mP4f8V8kq4h3pD9h2bR6kW9mT7jH}"
+    expiration: 600m
