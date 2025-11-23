@@ -149,6 +149,16 @@ public class CardService {
         return cardRepository.findByOwnerUsernameAndStatus(owner, status, pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Card getActiveUserCard(Long id, String username) {
+        Card card = cardRepository
+                .findByIdAndOwnerUsernameAndStatus(id, username, CardStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException("Active card not found"));
+
+        validateNotExpired(card);
+        return card;
+    }
+
     private void validateNotExpired(Card card) {
         if (card.getExpiry().isBefore(LocalDate.now())) {
             throw new ConflictException("Card is expired");
