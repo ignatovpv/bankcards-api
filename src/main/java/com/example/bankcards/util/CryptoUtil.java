@@ -37,7 +37,7 @@ public class CryptoUtil {
 
             return Base64.getEncoder().encodeToString(result);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to encrypt data", e);
         }
     }
 
@@ -56,7 +56,7 @@ public class CryptoUtil {
             byte[] decrypted = cipher.doFinal(encrypted);
             return new String(decrypted);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to decrypt data", e);
         }
     }
 }

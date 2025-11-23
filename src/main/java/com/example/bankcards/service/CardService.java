@@ -28,6 +28,8 @@ public class CardService {
     private final CardRepository cardRepository;
     private final UserAccountRepository userRepository;
 
+    private static final String CARD_NOT_FOUND_MESSAGE = "Card not found";
+
     @Transactional
     public Card create(Long userId, String pan, LocalDate expiry) {
         UserAccount owner = userRepository.findById(userId)
@@ -65,7 +67,7 @@ public class CardService {
     @Transactional
     public void delete(Long id) {
         if (!cardRepository.existsById(id)) {
-            throw new NotFoundException("Card not found");
+            throw new NotFoundException(CARD_NOT_FOUND_MESSAGE);
         }
         cardRepository.deleteById(id);
     }
@@ -82,6 +84,7 @@ public class CardService {
                 cardRepository.save(card);
             }
             case ACTIVE -> {
+                //already ACTIVE, idempotent
             }
             default -> throw new ConflictException("\"Card cannot be activated in current status");
         }
@@ -99,15 +102,15 @@ public class CardService {
                 cardRepository.save(card);
             }
             case BLOCKED -> {
+                //already BLOCKED, idempotent
             }
             default -> throw new ConflictException("Only cards with block request can be approved");
         }
     }
 
-    @Transactional(readOnly = true)
     public Card getById(Long id) {
         return cardRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
+                .orElseThrow(() -> new NotFoundException(CARD_NOT_FOUND_MESSAGE));
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +121,7 @@ public class CardService {
     @Transactional
     public void requestBlock(Long id, String owner) {
         Card card = cardRepository.findByIdAndOwnerUsername(id, owner)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
+                .orElseThrow(() -> new NotFoundException(CARD_NOT_FOUND_MESSAGE));
 
         validateNotExpired(card);
 
@@ -138,7 +141,7 @@ public class CardService {
     @Transactional(readOnly = true)
     public Card getUserCard(Long id, String username) {
         return cardRepository.findByIdAndOwnerUsername(id, username)
-                .orElseThrow(() -> new NotFoundException("Card not found"));
+                .orElseThrow(() -> new NotFoundException(CARD_NOT_FOUND_MESSAGE));
     }
 
     @Transactional(readOnly = true)
@@ -171,7 +174,7 @@ public class CardService {
             byte[] digest = md.digest(pan.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(digest);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
+            throw new IllegalStateException("SHA-256 algorithm not available", e);
         }
     }
 }

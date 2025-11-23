@@ -51,7 +51,7 @@ public class DataInitializer {
                 .role(Role.USER)
                 .build());
 
-        log.info("----Test users loaded----");
+        log.info("Test users loaded");
     }
 
     private void loadCards() {
@@ -78,6 +78,6 @@ public class DataInitializer {
         cardRepository.save(card2);
         cardRepository.save(card3);
 
-        System.out.println("----Test cards loaded----");
+        log.info("Test cards loaded");
     }
 }
