@@ -51,6 +51,65 @@ public class CardService {
         }
     }
 
+    @Transactional
+    public Card update(Long id, Card changes) {
+        Card card = getById(id);
+
+        if (changes.getExpiry() != null) {
+            card.setExpiry(changes.getExpiry());
+        }
+
+        return cardRepository.save(card);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        if (!cardRepository.existsById(id)) {
+            throw new NotFoundException("Card not found");
+        }
+        cardRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void activate(Long id) {
+        Card card = getById(id);
+
+        validateNotExpired(card);
+
+        switch (card.getStatus()) {
+            case CREATED -> {
+                card.setStatus(CardStatus.ACTIVE);
+                cardRepository.save(card);
+            }
+            case ACTIVE -> {
+            }
+            default -> throw new ConflictException("\"Card cannot be activated in current status");
+        }
+    }
+
+    @Transactional
+    public void approveBlock(Long id) {
+        Card card = getById(id);
+
+        validateNotExpired(card);
+
+        switch (card.getStatus()) {
+            case BLOCK_REQUESTED -> {
+                card.setStatus(CardStatus.BLOCKED);
+                cardRepository.save(card);
+            }
+            case BLOCKED -> {
+            }
+            default -> throw new ConflictException("Only cards with block request can be approved");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Card getById(Long id) {
+        return cardRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Card not found"));
+    }
+
     @Transactional(readOnly = true)
     public Page<Card> list(Pageable pageable) {
         return cardRepository.findAll(pageable);
