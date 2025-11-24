@@ -8,10 +8,35 @@ services:
       POSTGRES_DB: bankcards
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d bankcards" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - cards-net
+
+  app:
+    build: .
+    image: bankcards-api:latest
+    container_name: bankcards-api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bankcards
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/migration/db.changelog-master.yaml
     networks:
       - cards-net
 
